@@ -1,13 +1,15 @@
-# modules/cicd/main.tf
 resource "aws_codepipeline" "pipeline" {
   name     = var.pipeline_name
   role_arn = var.codepipeline_role_arn
+
   artifact_store {
     location = var.s3_bucket_name
     type     = "S3"
   }
+
   stage {
     name = "Source"
+
     action {
       name             = "Source"
       category         = "Source"
@@ -15,6 +17,7 @@ resource "aws_codepipeline" "pipeline" {
       provider         = "CodeStarSourceConnection"
       version          = "1"
       output_artifacts = ["source_output"]
+
       configuration = {
         ConnectionArn    = var.github_connection_arn
         FullRepositoryId = "ankurshashwat/ivent"
@@ -22,8 +25,10 @@ resource "aws_codepipeline" "pipeline" {
       }
     }
   }
+
   stage {
     name = "Plan"
+
     action {
       name             = "Terraform_Plan"
       category         = "Build"
@@ -32,20 +37,24 @@ resource "aws_codepipeline" "pipeline" {
       input_artifacts  = ["source_output"]
       output_artifacts = ["plan_output"]
       version          = "1"
+
       configuration = {
         ProjectName = aws_codebuild_project.plan.name
       }
     }
   }
+
   stage {
     name = "Apply"
+
     action {
-      name             = "Terraform_Apply"
-      category         = "Build"
-      owner            = "AWS"
-      provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      version          = "1"
+      name            = "Terraform_Apply"
+      category        = "Build"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      input_artifacts = ["source_output"]
+      version         = "1"
+
       configuration = {
         ProjectName = aws_codebuild_project.apply.name
       }
@@ -54,25 +63,30 @@ resource "aws_codepipeline" "pipeline" {
 }
 
 resource "aws_codebuild_project" "plan" {
-  name          = "${var.codebuild_project_name}-plan"
-  service_role  = var.codebuild_role_arn
+  name         = "${var.codebuild_project_name}-plan"
+  service_role = var.codebuild_role_arn
+
   artifacts {
     type = "CODEPIPELINE"
   }
+
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
     image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
+
     environment_variable {
       name  = "TF_STATE_BUCKET"
       value = var.s3_bucket_name
     }
+
     environment_variable {
       name  = "TF_LOCK_TABLE"
       value = var.dynamodb_lock_table
     }
   }
+
   source {
     type      = "CODEPIPELINE"
     buildspec = <<-EOF
@@ -83,7 +97,7 @@ resource "aws_codebuild_project" "plan" {
             - apt-get update
             - apt-get install -y unzip
             - curl -o terraform.zip https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
-            - unzip terraform.zip
+            - unzip -o terraform.zip
             - mv terraform /usr/local/bin/
         build:
           commands:
@@ -98,25 +112,30 @@ resource "aws_codebuild_project" "plan" {
 }
 
 resource "aws_codebuild_project" "apply" {
-  name          = "${var.codebuild_project_name}-apply"
-  service_role  = var.codebuild_role_arn
+  name         = "${var.codebuild_project_name}-apply"
+  service_role = var.codebuild_role_arn
+
   artifacts {
     type = "CODEPIPELINE"
   }
+
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
     image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
+
     environment_variable {
       name  = "TF_STATE_BUCKET"
       value = var.s3_bucket_name
     }
+
     environment_variable {
       name  = "TF_LOCK_TABLE"
       value = var.dynamodb_lock_table
     }
   }
+
   source {
     type      = "CODEPIPELINE"
     buildspec = <<-EOF
@@ -127,7 +146,7 @@ resource "aws_codebuild_project" "apply" {
             - apt-get update
             - apt-get install -y unzip
             - curl -o terraform.zip https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
-            - unzip terraform.zip
+            - unzip -o terraform.zip
             - mv terraform /usr/local/bin/
         build:
           commands:
