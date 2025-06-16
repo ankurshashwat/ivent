@@ -28,11 +28,6 @@ variable "github_connection_arn" {
   type        = string
 }
 
-variable "github_repo" {
-  description = "Full GitHub repository ID (e.g., username/repo)"
-  type        = string
-}
-
 variable "dynamodb_lock_table" {
   description = "Name of the DynamoDB table for Terraform state lock"
   type        = string
