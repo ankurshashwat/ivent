@@ -1,0 +1,30 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - echo "Installing Terraform..."
+      - curl -fsSL https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip -o terraform.zip
+      - unzip terraform.zip
+      - mv terraform /usr/local/bin/
+  pre_build:
+    commands:
+      - echo "Checking if S3 bucket exists..."
+      - |
+        if aws s3 ls s3://ivent-tf-state-dev --region us-east-1 >/dev/null 2>&1; then
+          echo "S3 bucket exists, initializing with S3 backend"
+          terraform init
+        else
+          echo "S3 bucket does not exist, initializing with local backend"
+          mv backend.tf backend.tf.bak || true
+          terraform init
+        fi
+  build:
+    commands:
+      - echo "Applying Terraform configuration..."
+      - terraform apply -auto-approve
+      - |
+        if [ -f backend.tf.bak ]; then
+          echo "Switching to S3 backend after bucket creation"
+          mv backend.tf.bak backend.tf
+          terraform init -migrate-state -force-copy
+        fi
