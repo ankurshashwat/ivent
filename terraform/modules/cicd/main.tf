@@ -17,7 +17,7 @@ resource "aws_codepipeline" "pipeline" {
       output_artifacts = ["source_output"]
       configuration = {
         ConnectionArn    = var.github_connection_arn
-        FullRepositoryId = var.github_repo
+        FullRepositoryId = "ankurshashwat/ivent"
         BranchName       = "main"
       }
     }
