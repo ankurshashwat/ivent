@@ -89,6 +89,5 @@ module "cicd" {
   codebuild_role_arn        = module.iam.codebuild_role_arn
   s3_bucket_name            = var.bucket_name
   dynamodb_lock_table       = var.dynamodb_lock_table
-  github_repo               = var.github_repo
   github_connection_arn     = var.github_connection_arn
 }
