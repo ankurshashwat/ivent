@@ -13,8 +13,6 @@ Key features:
 - **Secure Architecture**: Deploy Lambda functions in private subnets of a custom VPC.
 - **CI/CD Automation**: Automate infrastructure updates with CodePipeline and CodeBuild.
 
-This project demonstrates expertise in AWS serverless technologies, Terraform modular design, and DevOps practices, making it an ideal portfolio piece for cloud engineering roles.
-
 ## 🛠️ Tech Stack
 
 | Technology | Purpose |
