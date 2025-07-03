@@ -1,6 +1,6 @@
 # Event Announcement System
 
-**Ivent is a serverless, event-driven platform for managing and announcing events with automated notifications, built using AWS and Terraform with a robust CI/CD pipeline.**
+**Ivent is a serverless, event-driven architecture for managing and announcing events with automated notifications, built using AWS and Terraform with a robust CI/CD pipeline.**
 
 ## 📖 Project Overview
 
