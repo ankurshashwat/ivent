@@ -42,7 +42,7 @@ The system follows a modular, serverless, and event-driven architecture:
 - **CI/CD**: GitHub Actions automates Terraform init, plan, and apply stages, triggered by GitHub commits to the `main` branch.
 - **IaC**: Terraform modules (`vpc`, `lambda`, `iam`, `api_gateway`, etc.) define all infrastructure.
 
-![Architecture Diagram](https://github.com/ankurshashwat/junkyard/blob/96f531f82962b189b28d7e1cd1238da27b8b9eca/ivent-diagram.PNG)
+![Architecture Diagram](https://github.com/ankurshashwat/ivent/blob/00480bcd989aa991cae53c1a4d91b20c9803e751/ivent-architecture.PNG)
 
 ## 📂 Repository Structure
 
