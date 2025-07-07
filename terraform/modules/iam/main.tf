@@ -27,25 +27,28 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "dynamodb:GetItem",
           "dynamodb:Scan",
           "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem"
-        ]
-        Resource = [var.events_table_arn, var.subscriptions_table_arn]
-      },
-      {
-        Effect = "Allow"
-        Action = [
+          "dynamodb:DeleteItem",
           "dynamodb:GetRecords",
           "dynamodb:GetShardIterator",
           "dynamodb:DescribeStream",
-          "dynamodb:ListStreams"
+          "dynamodb:ListStreams",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:DescribeTable"
         ]
-        Resource = var.events_table_stream_arn
+        Resource = [
+          var.events_table_arn,
+          var.subscriptions_table_arn,
+          var.events_table_stream_arn
+        ]
       },
       {
         Effect = "Allow"
         Action = [
           "sns:Publish",
-          "sns:Subscribe"
+          "sns:Subscribe",
+          "sns:GetTopicAttributes",
+          "sns:SetTopicAttributes",
+          "sns:ListTagsForResource"
         ]
         Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
       },
@@ -110,11 +113,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket",
-          "s3:GetBucketLocation",
-          "s3:DeleteObject"
+          "s3:*"
         ]
         Resource = [
           "arn:aws:s3:::ivent-tf-state-bucket",
@@ -126,28 +125,19 @@ resource "aws_iam_role_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "dynamodb:CreateTable",
-          "dynamodb:PutItem",
-          "dynamodb:GetItem",
-          "dynamodb:Scan",
-          "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:DescribeTable",
-          "dynamodb:DeleteTable",
-          "dynamodb:DescribeContinuousBackups"
+          "dynamodb:*"
         ]
         Resource = [
           var.events_table_arn,
           var.subscriptions_table_arn,
+          var.events_table_stream_arn,
           "arn:aws:dynamodb:us-east-1:533267197673:table/ivent-tf-lock"
         ]
       },
       {
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:*"
         ]
         Resource = [
           "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*",
@@ -157,76 +147,28 @@ resource "aws_iam_role_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "cognito-idp:CreateUserPool",
-          "cognito-idp:DeleteUserPool",
-          "cognito-idp:DescribeUserPool",
-          "cognito-idp:UpdateUserPool",
-          "cognito-idp:CreateUserPoolClient",
-          "cognito-idp:DeleteUserPoolClient",
-          "cognito-idp:DescribeUserPoolClient",
-          "cognito-idp:GetUserPoolMfaConfig",
-          "cognito-idp:AdminCreateUser",
-          "cognito-idp:AdminDeleteUser"
+          "cognito-idp:*"
         ]
         Resource = "arn:aws:cognito-idp:us-east-1:533267197673:userpool/*"
       },
       {
         Effect = "Allow"
         Action = [
-          "sns:CreateTopic",
-          "sns:DeleteTopic",
-          "sns:Subscribe",
-          "sns:Publish",
-          "sns:GetTopicAttributes",
-          "sns:SetTopicAttributes",
-          "sns:ListTagsForResource"
+          "sns:*"
         ]
         Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
       },
       {
         Effect = "Allow"
         Action = [
-          "ec2:CreateVpc",
-          "ec2:AllocateAddress",
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface",
-          "ec2:DescribeVpcs",
-          "ec2:ModifyVpcAttribute",
-          "ec2:CreateSubnet",
-          "ec2:DescribeSubnets",
-          "ec2:CreateRouteTable",
-          "ec2:DescribeRouteTables",
-          "ec2:CreateRoute",
-          "ec2:AssociateRouteTable",
-          "ec2:CreateInternetGateway",
-          "ec2:AttachInternetGateway",
-          "ec2:DescribeInternetGateways",
-          "ec2:CreateNatGateway",
-          "ec2:DescribeNatGateways",
-          "ec2:CreateTags",
-          "ec2:DeleteSubnet",
-          "ec2:DeleteRouteTable",
-          "ec2:DeleteInternetGateway",
-          "ec2:DeleteNatGateway",
-          "ec2:ReleaseAddress",
-          "ec2:DescribeVpcAttribute",
-          "ec2:DescribeAddresses"
+          "ec2:*"
         ]
         Resource = "*"
       },
       {
         Effect = "Allow"
         Action = [
-          "lambda:CreateFunction",
-          "lambda:DeleteFunction",
-          "lambda:UpdateFunctionCode",
-          "lambda:UpdateFunctionConfiguration",
-          "lambda:GetFunction",
-          "lambda:InvokeFunction",
-          "lambda:AddPermission",
-          "lambda:RemovePermission",
-          "lambda:GetFunctionConfiguration"
+          "lambda:*"
         ]
         Resource = [
           "arn:aws:lambda:us-east-1:533267197673:function:EventManagement",
@@ -237,49 +179,61 @@ resource "aws_iam_role_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "apigateway:POST",
-          "apigateway:GET",
-          "apigateway:PUT",
-          "apigateway:DELETE",
-          "apigateway:PATCH",
-          "apigateway:UpdateRestApiPolicy"
+          "apigateway:*"
         ]
         Resource = "arn:aws:apigateway:us-east-1::/restapis/egwv8azp80/*"
       },
       {
         Effect = "Allow"
         Action = [
-          "ssm:GetParameter",
-          "ssm:PutParameter",
-          "ssm:DeleteParameter"
+          "ssm:*"
         ]
         Resource = "arn:aws:ssm:us-east-1:533267197673:parameter/ivent/*"
       },
       {
         Effect = "Allow"
         Action = [
-          "iam:CreateRole",
-          "iam:DeleteRole",
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy",
-          "iam:UpdateRole",
-          "iam:GetRole",
-          "iam:PassRole",
-          "iam:CreatePolicy",
-          "iam:DeletePolicy",
-          "iam:GetPolicy",
-          "iam:UpdatePolicy",
-          "iam:ListRolePolicies",
-          "iam:GetRolePolicy",
-          "iam:PutRolePolicy",
-          "iam:DeleteRolePolicy",
-          "iam:ListAttachedRolePolicies"
+          "iam:*"
         ]
         Resource = [
           aws_iam_role.lambda_role.arn,
           aws_iam_role.github_actions_role.arn,
-          "arn:aws:iam::533267197673:policy/*"
+          "arn:aws:iam::533267197673:policy/*",
+          "arn:aws:iam::533267197673:role/Ivent*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:CreateKey",
+          "kms:DescribeKey",
+          "kms:EnableKey",
+          "kms:EnableKeyRotation",
+          "kms:DisableKey",
+          "kms:DisableKeyRotation",
+          "kms:GetKeyPolicy",
+          "kms:PutKeyPolicy",
+          "kms:UpdateKeyDescription",
+          "kms:TagResource",
+          "kms:UntagResource",
+          "kms:ListResourceTags",
+          "kms:ScheduleKeyDeletion"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "events:*"
+        ]
+        Resource = "arn:aws:events:us-east-1:533267197673:event-bus/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "xray:*"
+        ]
+        Resource = "*"
       }
     ]
   })
