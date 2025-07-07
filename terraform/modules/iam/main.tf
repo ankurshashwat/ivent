@@ -1,4 +1,3 @@
-# modules/iam/main.tf
 resource "aws_iam_role" "lambda_role" {
   name = var.lambda_role_name
   assume_role_policy = jsonencode({
@@ -80,62 +79,31 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-resource "aws_iam_role" "codepipeline_role" {
-  name = var.codepipeline_role_name
+resource "aws_iam_role" "github_actions_role" {
+  name = var.github_actions_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "codepipeline.amazonaws.com"
+          Federated = "arn:aws:iam::533267197673:oidc-provider/token.actions.githubusercontent.com"
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:sub" = "repo:ankurshashwat/ivent:ref:refs/heads/main"
+          }
         }
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy" "codepipeline_policy" {
-  name = "${var.codepipeline_role_name}-policy"
-  role = aws_iam_role.codepipeline_role.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "codebuild:StartBuild",
-          "codebuild:BatchGetBuilds",
-          "codestar-connections:UseConnection"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role" "codebuild_role" {
-  name = var.codebuild_role_name
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "codebuild.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "codebuild_policy" {
-  name = "${var.codebuild_role_name}-policy"
-  role = aws_iam_role.codebuild_role.id
+resource "aws_iam_role_policy" "github_actions_policy" {
+  name = "${var.github_actions_role_name}-policy"
+  role = aws_iam_role.github_actions_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -146,19 +114,28 @@ resource "aws_iam_role_policy" "codebuild_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*",
+          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*:log-stream:*"
+        ]
       },
       {
         Effect = "Allow"
         Action = [
           "s3:GetObject",
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:s3:::ivent-tf-state-dev",
+          "arn:aws:s3:::ivent-tf-state-dev/*"
+        ]
       },
       {
         Effect = "Allow"
         Action = [
+          "dynamodb:CreateTable",
           "dynamodb:PutItem",
           "dynamodb:GetItem",
           "dynamodb:Scan",
@@ -166,29 +143,63 @@ resource "aws_iam_role_policy" "codebuild_policy" {
           "dynamodb:DeleteItem",
           "dynamodb:DescribeTable"
         ]
-        Resource = [var.events_table_arn, var.subscriptions_table_arn]
+        Resource = [
+          var.events_table_arn,
+          var.subscriptions_table_arn,
+          "arn:aws:dynamodb:us-east-1:533267197673:table/ivent-tf-lock"
+        ]
       },
       {
         Effect = "Allow"
         Action = [
-          "iam:CreateRole",
-          "iam:DeleteRole",
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy",
-          "iam:UpdateRole",
-          "iam:GetRole",
-          "iam:PassRole",
-          "iam:CreatePolicy",
-          "iam:DeletePolicy",
-          "iam:GetPolicy",
-          "iam:UpdatePolicy"
+          "cognito-idp:CreateUserPool",
+          "cognito-idp:DeleteUserPool",
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:UpdateUserPool",
+          "cognito-idp:CreateUserPoolClient",
+          "cognito-idp:DeleteUserPoolClient",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:GetUserPoolMfaConfig"
         ]
-        Resource = [
-          aws_iam_role.lambda_role.arn,
-          aws_iam_role.codepipeline_role.arn,
-          aws_iam_role.codebuild_role.arn,
-          "arn:aws:iam::533267197673:policy/*"
+        Resource = "arn:aws:cognito-idp:us-east-1:533267197673:userpool/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:CreateTopic",
+          "sns:DeleteTopic",
+          "sns:Subscribe",
+          "sns:Publish",
+          "sns:GetTopicAttributes",
+          "sns:SetTopicAttributes",
+          "sns:ListTagsForResource"
         ]
+        Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateVpc",
+          "ec2:AllocateAddress",
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeVpcs",
+          "ec2:ModifyVpcAttribute",
+          "ec2:CreateSubnet",
+          "ec2:DescribeSubnets",
+          "ec2:CreateRouteTable",
+          "ec2:DescribeRouteTables",
+          "ec2:CreateRoute",
+          "ec2:AssociateRouteTable",
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:DescribeInternetGateways",
+          "ec2:CreateNatGateway",
+          "ec2:DescribeNatGateways",
+          "ec2:CreateTags"
+        ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -222,36 +233,32 @@ resource "aws_iam_role_policy" "codebuild_policy" {
       {
         Effect = "Allow"
         Action = [
-          "sns:CreateTopic",
-          "sns:DeleteTopic",
-          "sns:Subscribe",
-          "sns:Publish",
-          "sns:GetTopicAttributes",
-          "sns:SetTopicAttributes"
+          "ssm:GetParameter",
+          "ssm:PutParameter",
+          "ssm:DeleteParameter"
         ]
-        Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
+        Resource = "arn:aws:ssm:us-east-1:533267197673:parameter/ivent/*"
       },
       {
         Effect = "Allow"
         Action = [
-          "cognito-idp:CreateUserPool",
-          "cognito-idp:DeleteUserPool",
-          "cognito-idp:DescribeUserPool",
-          "cognito-idp:UpdateUserPool",
-          "cognito-idp:CreateUserPoolClient",
-          "cognito-idp:DeleteUserPoolClient",
-          "cognito-idp:DescribeUserPoolClient"
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:UpdateRole",
+          "iam:GetRole",
+          "iam:PassRole",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:UpdatePolicy"
         ]
-        Resource = "arn:aws:cognito-idp:us-east-1:533267197673:userpool/*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface"
+        Resource = [
+          aws_iam_role.lambda_role.arn,
+          aws_iam_role.github_actions_role.arn,
+          "arn:aws:iam::533267197673:policy/*"
         ]
-        Resource = "*"
       }
     ]
   })

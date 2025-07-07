@@ -3,14 +3,8 @@ variable "lambda_role_name" {
   type        = string
 }
 
-variable "codepipeline_role_name" {
-  description = "Name of the CodePipeline IAM role"
-  type        = string
-}
-
-variable "codebuild_role_name" {
-  description = "Name of the CodeBuild IAM role"
-  type        = string
+variable "github_actions_role_name" {
+  description = "Name of the IAM role for GitHub Actions"
 }
 
 variable "events_table_arn" {
