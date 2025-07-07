@@ -1,6 +1,6 @@
 # Event Announcement System
 
-**Ivent is a serverless, event-driven architecture for managing and announcing events with automated notifications, built using AWS and Terraform with a robust CI/CD pipeline.**
+**Ivent is a serverless, event-driven architecture for managing and announcing events with automated notifications, built using AWS and Terraform with a robust CI/CD pipeline powered by GitHub Actions.**
 
 ## 📖 Project Overview
 
@@ -11,7 +11,7 @@ Key features:
 - **Subscription Handling**: Allow users to subscribe to notifications via email.
 - **Automated Notifications**: Trigger email alerts for new events using DynamoDB Streams and SNS.
 - **Secure Architecture**: Deploy Lambda functions in private subnets of a custom VPC.
-- **CI/CD Automation**: Automate infrastructure updates with CodePipeline and CodeBuild.
+- **CI/CD Automation**: Automate infrastructure updates with GitHub Actions.
 
 ## 🛠️ Tech Stack
 
@@ -24,9 +24,8 @@ Key features:
 | **AWS SES** | Email delivery for subscriber notifications |
 | **AWS VPC** | Custom network with public/private subnets and NAT gateway |
 | **AWS Cognito** | User authentication and API security |
-| **AWS CodePipeline** | CI/CD pipeline for automated deployments |
-| **AWS CodeBuild** | Build and deploy Terraform configurations |
-| **AWS S3** | Storage for pipeline artifacts and Terraform state |
+| **GitHub Actions** | CI/CD pipeline for automated Terraform deployments |
+| **AWS S3** | Storage for Terraform state |
 | **Terraform** | Infrastructure as Code for provisioning AWS resources |
 | **GitHub** | Version control and CI/CD trigger |
 
@@ -40,22 +39,23 @@ The system follows a modular, serverless, and event-driven architecture:
   - **DynamoDB**: Stores events and subscriptions, with Streams enabled for real-time event detection.
   - **SNS & SES**: Facilitate email subscriptions and notifications.
 - **Networking**: A custom VPC with public and private subnets, NAT gateway, and security groups ensures secure Lambda execution.
-- **CI/CD**: CodePipeline with CodeBuild automates Terraform plan and apply stages, triggered by GitHub commits.
-- **IaC**: Terraform modules (`vpc`, `lambda`, `iam`, `cicd`, etc.) define all infrastructure.
+- **CI/CD**: GitHub Actions automates Terraform init, plan, and apply stages, triggered by GitHub commits to the `main` branch.
+- **IaC**: Terraform modules (`vpc`, `lambda`, `iam`, `api_gateway`, etc.) define all infrastructure.
 
-![Architecture Diagram](https://github.com/ankurshashwat/junkyard/blob/b3c736010426d4c1f06a9a0a3053b88bd1c4fc0f/ivent_architecture.PNG)
+![Architecture Diagram](https://github.com/ankurshashwat/junkyard/blob/96f531f82962b189b28d7e1cd1238da27b8b9eca/ivent-diagram.PNG)
 
 ## 📂 Repository Structure
 
 ```plaintext
 ivent/
-├──backend/
-│    ├──main.tf
-│    └──variables.tf
-├──terraform/
+├── backend/
+│    ├── main.tf
+│    └── variables.tf
+├── terraform/
 │    ├── main.tf                   # Root Terraform configuration
 │    ├── variables.tf              # Root input variables
 │    ├── outputs.tf                # Root output values
+│    ├── terraform.tfvars          # Terraform variable definitions
 │    ├── lambda_functions/         # Lambda source code and deployment packages
 │    │    ├── event_management/
 │    │    ├── subscription_management/
@@ -63,16 +63,18 @@ ivent/
 │    └── modules/                  # Terraform modules
 │         ├── vpc/                 # Custom VPC with subnets and NAT gateway
 │         ├── lambda/              # Lambda functions with VPC configuration
-│         ├── iam/                 # IAM roles for Lambda, CodePipeline, CodeBuild
-│         ├── cicd/                # CI/CD pipeline with CodePipeline and CodeBuild
+│         ├── iam/                 # IAM roles for Lambda and GitHub Actions
 │         ├── api_gateway/         # API Gateway with REST endpoints
 │         ├── sns/                 # SNS topic for notifications
 │         ├── dynamodb/            # DynamoDB tables for events and subscriptions
 │         ├── cognito/             # Cognito user pool for authentication
-│         └── backend/             # S3 buckets for artifacts and state
+│         └── backend/             # S3 buckets for Terraform state
+├── .github/
+│    └── workflows/
+│         └── terraform.yml        # GitHub Actions workflow for CI/CD
 ├── README.md                      # Project documentation
 ├── .gitignore                     # Git ignore rules
-└── buildspec.yml                  # CodeBuild instructions for Lambda packaging
+└── LICENSE                        # MIT License
 ```
 
 ## 🚀 Setup Instructions
@@ -106,14 +108,22 @@ Follow these steps to fork and set up the project locally:
      ```
      - Provide Access Key, Secret Key, region (`us-east-1`), and output format (`json`).
 
-3. **Initialize Terraform**
+3. **Setup Github Actions Secrets**
+   - Go to https://github.com/ankurshashwat/ivent > Settings > Secrets and variables > Actions.
+   - Add secrets:
+    ```bash
+    TEST_USERNAME: Cognito test username
+    TEST_PASSWORD: Cognito test password
+    ```
+
+4. **Initialize Terraform**
    - Initialize the Terraform working directory:
      ```bash
      terraform init
      ```
      - This configures the S3 backend (`ivent-tf-state-dev`) and DynamoDB lock table (`ivent-tf-lock`).
 
-4. **Set Up Terraform Variables**
+5. **Set Up Terraform Variables**
    - Create a `terraform.tfvars` file in the root directory:
      ```hcl
      aws_region          = "us-east-1"
@@ -122,23 +132,8 @@ Follow these steps to fork and set up the project locally:
      public_subnets      = ["10.0.1.0/24", "10.0.2.0/24"]
      private_subnets     = ["10.0.3.0/24", "10.0.4.0/24"]
      github_repo         = "your-username/ivent"
-     github_connection_arn = "arn:aws:codestar-connections:us-east-1:your-account-id:connection/your-connection-id"
      ```
      - Replace `your-username`, `your-account-id`, and `your-connection-id` with your values.
-     - Obtain `github_connection_arn` from **AWS Console** > **CodePipeline** > **Settings** > **Connections**.
-
-5. **Package Lambda Functions**
-   - Navigate to `lambda_functions` and zip each function:
-     ```bash
-     cd lambda_functions/event_management
-     zip -r event_management.zip .
-     cd ../subscription_management
-     zip -r subscription_management.zip .
-     cd ../notification_trigger
-     zip -r notification_trigger.zip .
-     cd ../../
-     ```
-   - Ensure `lambda_function.py` exists in each directory (see `lambda_functions` structure).
 
 6. **Deploy Infrastructure**
    - Run Terraform plan to preview changes:
@@ -196,7 +191,7 @@ Follow these steps to fork and set up the project locally:
      git commit -m "Update Lambda tags for testing CI/CD pipeline"
      git push origin main
      ```
-   - Monitor pipeline in **AWS Console** > **CodePipeline** > **Pipelines** > `IventPipeline`.
+   - Monitor the workflow in Github > Actions > Terraform CI/CD.
 
 10. **Clean Up**
     - Destroy resources to avoid costs:
@@ -209,14 +204,14 @@ Follow these steps to fork and set up the project locally:
 - **Infrastructure**: Verified VPC, subnets, NAT gateway, and security groups in AWS Console.
 - **API Endpoints**: Tested `/subscriptions` and `/events` with Postman, confirming 200 OK responses.
 - **Notifications**: Received SNS/SES emails for subscriptions and events.
-- **CI/CD**: Triggered pipeline via GitHub commits, validated Terraform plan/apply stages.
+- **CI/CD**: Triggered Github Actions workflow via GitHub commits, validated Terraform plan/apply stages.
 - **Security**: Ensured Lambda runs in private subnets with Cognito authentication.
 
 ## 📚 Lessons Learned
 
 - **Modular Terraform**: Structured modules for scalability and maintainability.
 - **Serverless Security**: Leveraged VPC private subnets for Lambda execution.
-- **CI/CD Best Practices**: Implemented plan/apply stages for safe IaC deployments.
+- **CI/CD Best Practices**: Implemented Github Actions for efficient IaC deployments with OIDC authentication.
 - **Event-Driven Design**: Mastered DynamoDB Streams and SNS integration.
 
 ## 🚧 Future Improvements
