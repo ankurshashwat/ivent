@@ -110,24 +110,15 @@ resource "aws_iam_role_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = [
-          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*",
-          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*:log-stream:*"
-        ]
-      },
-      {
-        Effect = "Allow"
-        Action = [
           "s3:GetObject",
           "s3:PutObject",
           "s3:ListBucket",
-          "s3:GetBucketLocation"
+          "s3:GetBucketLocation",
+          "s3:DeleteObject"
         ]
         Resource = [
+          "arn:aws:s3:::ivent-tf-state-bucket",
+          "arn:aws:s3:::ivent-tf-state-bucket/*",
           "arn:aws:s3:::ivent-tf-state-dev",
           "arn:aws:s3:::ivent-tf-state-dev/*"
         ]
@@ -141,12 +132,25 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "dynamodb:Scan",
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem",
-          "dynamodb:DescribeTable"
+          "dynamodb:DescribeTable",
+          "dynamodb:DeleteTable"
         ]
         Resource = [
           var.events_table_arn,
           var.subscriptions_table_arn,
           "arn:aws:dynamodb:us-east-1:533267197673:table/ivent-tf-lock"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = [
+          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*",
+          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*:log-stream:*"
         ]
       },
       {
@@ -159,7 +163,9 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "cognito-idp:CreateUserPoolClient",
           "cognito-idp:DeleteUserPoolClient",
           "cognito-idp:DescribeUserPoolClient",
-          "cognito-idp:GetUserPoolMfaConfig"
+          "cognito-idp:GetUserPoolMfaConfig",
+          "cognito-idp:AdminCreateUser",
+          "cognito-idp:AdminDeleteUser"
         ]
         Resource = "arn:aws:cognito-idp:us-east-1:533267197673:userpool/*"
       },
@@ -197,7 +203,12 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "ec2:DescribeInternetGateways",
           "ec2:CreateNatGateway",
           "ec2:DescribeNatGateways",
-          "ec2:CreateTags"
+          "ec2:CreateTags",
+          "ec2:DeleteSubnet",
+          "ec2:DeleteRouteTable",
+          "ec2:DeleteInternetGateway",
+          "ec2:DeleteNatGateway",
+          "ec2:ReleaseAddress"
         ]
         Resource = "*"
       },
@@ -211,7 +222,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "lambda:GetFunction",
           "lambda:InvokeFunction",
           "lambda:AddPermission",
-          "lambda:RemovePermission"
+          "lambda:RemovePermission",
+          "lambda:GetFunctionConfiguration"
         ]
         Resource = [
           "arn:aws:lambda:us-east-1:533267197673:function:EventManagement",
@@ -226,7 +238,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "apigateway:GET",
           "apigateway:PUT",
           "apigateway:DELETE",
-          "apigateway:PATCH"
+          "apigateway:PATCH",
+          "apigateway:UpdateRestApiPolicy"
         ]
         Resource = "arn:aws:apigateway:us-east-1::/restapis/egwv8azp80/*"
       },
@@ -252,7 +265,11 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "iam:CreatePolicy",
           "iam:DeletePolicy",
           "iam:GetPolicy",
-          "iam:UpdatePolicy"
+          "iam:UpdatePolicy",
+          "iam:ListRolePolicies",
+          "iam:GetRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy"
         ]
         Resource = [
           aws_iam_role.lambda_role.arn,
