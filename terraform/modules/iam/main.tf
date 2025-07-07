@@ -133,7 +133,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem",
           "dynamodb:DescribeTable",
-          "dynamodb:DeleteTable"
+          "dynamodb:DeleteTable",
+          "dynamodb:DescribeContinuousBackups"
         ]
         Resource = [
           var.events_table_arn,
@@ -208,7 +209,9 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "ec2:DeleteRouteTable",
           "ec2:DeleteInternetGateway",
           "ec2:DeleteNatGateway",
-          "ec2:ReleaseAddress"
+          "ec2:ReleaseAddress",
+          "ec2:DescribeVpcAttribute",
+          "ec2:DescribeAddresses"
         ]
         Resource = "*"
       },
@@ -269,7 +272,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "iam:ListRolePolicies",
           "iam:GetRolePolicy",
           "iam:PutRolePolicy",
-          "iam:DeleteRolePolicy"
+          "iam:DeleteRolePolicy",
+          "iam:ListAttachedRolePolicies"
         ]
         Resource = [
           aws_iam_role.lambda_role.arn,
