@@ -171,9 +171,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "lambda:*"
         ]
         Resource = [
-          "arn:aws:lambda:us-east-1:533267197673:function:EventManagement",
-          "arn:aws:lambda:us-east-1:533267197673:function:SubscriptionManagement",
-          "arn:aws:lambda:us-east-1:533267197673:function:NotificationTrigger"
+          "arn:aws:lambda:us-east-1:533267197673:*",
+          "arn:aws:lambda:us-east-1:533267197673:event-source-mapping:*"
         ]
       },
       {
@@ -205,19 +204,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "kms:CreateKey",
-          "kms:DescribeKey",
-          "kms:EnableKey",
-          "kms:EnableKeyRotation",
-          "kms:DisableKey",
-          "kms:DisableKeyRotation",
-          "kms:GetKeyPolicy",
-          "kms:PutKeyPolicy",
-          "kms:UpdateKeyDescription",
-          "kms:TagResource",
-          "kms:UntagResource",
-          "kms:ListResourceTags",
-          "kms:ScheduleKeyDeletion"
+          "kms:*"
         ]
         Resource = "*"
       },
