@@ -181,8 +181,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "apigateway:*"
         ]
         Resource = [
-          "arn:aws:apigateway:us-east-1::/restapis/egwv8azp80/*",
-          "arn:aws:apigateway:us-east-1::/restapis/3awqz21xg5/*"
+          "arn:aws:apigateway:us-east-1::/restapis/*"
         ]
       },
       {
