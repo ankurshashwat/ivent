@@ -44,8 +44,7 @@ module "dynamodb" {
 module "iam" {
   source                   = "./modules/iam"
   lambda_role_name         = "IventLambdaRole"
-  codepipeline_role_name   = "IventCodePipelineRole"
-  codebuild_role_name      = "IventCodeBuildRole"
+  github_actions_role_name = "IventGithubActionsRole"
   events_table_arn         = module.dynamodb.events_table_arn
   subscriptions_table_arn  = module.dynamodb.subscriptions_table_arn
   sns_topic_arn            = module.sns.sns_topic_arn
@@ -79,15 +78,4 @@ module "api_gateway" {
   test_username                         = var.test_username
   test_password                         = var.test_password
   depends_on                            = [module.lambda, module.cognito]
-}
-
-module "cicd" {
-  source                    = "./modules/cicd"
-  pipeline_name             = "IventPipeline"
-  codebuild_project_name    = "IventBuild"
-  codepipeline_role_arn     = module.iam.codepipeline_role_arn
-  codebuild_role_arn        = module.iam.codebuild_role_arn
-  s3_bucket_name            = var.bucket_name
-  dynamodb_lock_table       = var.dynamodb_lock_table
-  github_connection_arn     = var.github_connection_arn
 }
