@@ -53,16 +53,6 @@ output "lambda_role_arn" {
   value       = module.iam.lambda_role_arn
 }
 
-output "codepipeline_role_arn" {
-  description = "ARN of the CodePipeline IAM role"
-  value       = module.iam.codepipeline_role_arn
-}
-
-output "codebuild_role_arn" {
-  description = "ARN of the CodeBuild IAM role"
-  value       = module.iam.codebuild_role_arn
-}
-
 # DynamoDB
 output "events_table_arn" {
   description = "ARN of the Events table"
@@ -103,10 +93,4 @@ output "user_pool_arn" {
 output "client_id" {
   description = "Cognito User Pool Client ID"
   value       = module.cognito.client_id
-}
-
-# CI/CD
-output "pipeline_name" {
-  description = "Name of the CodePipeline"
-  value       = module.cicd.pipeline_name
 }

@@ -45,8 +45,8 @@ variable "github_repo" {
   type        = string
 }
 
-variable "github_connection_arn" {
-  description = "ARN of CodeStar connection to GitHub"
+variable "github_actions_role_name" {
+  description = "Name of the IAM role for GitHub Actions"
   type        = string
 }
 
