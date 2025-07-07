@@ -1,3 +1,19 @@
+resource "aws_iam_openid_connect_provider" "github_actions" {
+  url = "https://token.actions.githubusercontent.com"
+
+  client_id_list = [
+    "sts.amazonaws.com"
+  ]
+
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1"
+  ]
+
+  tags = {
+    Name = "GitHubActionsOIDC"
+  }
+}
+
 resource "aws_iam_role" "lambda_role" {
   name = var.lambda_role_name
   assume_role_policy = jsonencode({
@@ -90,7 +106,7 @@ resource "aws_iam_role" "github_actions_role" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::533267197673:oidc-provider/token.actions.githubusercontent.com"
+          Federated = aws_iam_openid_connect_provider.github_actions.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
