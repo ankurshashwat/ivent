@@ -15,7 +15,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       TF_VAR_lambda_role_name: IventLambdaRole
-      TF_VAR_codebuild_role_name: IventCodeBuildRole
+      TF_VAR_github_actions_role_name: IventGithubActionsRole
       TF_VAR_events_table_arn: arn:aws:dynamodb:us-east-1:533267197673:table/Events
       TF_VAR_subscriptions_table_arn: arn:aws:dynamodb:us-east-1:533267197673:table/Subscriptions
       TF_VAR_events_table_stream_arn: arn:aws:dynamodb:us-east-1:533267197673:table/Events/stream/*
@@ -35,7 +35,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::533267197673:role/IventCodeBuildRole
+          role-to-assume: arn:aws:iam::533267197673:role/IventGithubActionsRole
           aws-region: us-east-1
 
       - name: Terraform Init
