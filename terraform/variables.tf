@@ -4,6 +4,10 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "aws_account_id" {
+  description = "AWS account ID"
+}
+
 variable "bucket_name" {
   description = "S3 bucket name for Terraform state"
   type        = string
@@ -59,4 +63,9 @@ variable "test_password" {
   description = "Test user password for Cognito authentication"
   type        = string
   sensitive   = true
+}
+
+variable "sender_email" {
+  description = "Sender email address for SES"
+  type        = string
 }

@@ -30,6 +30,13 @@ module "cognito" {
   user_pool_name     = "ivent-user-pool"
 }
 
+module "ses" {
+  source          = "./modules/ses"
+  sender_email    = var.sender_email
+  sns_topic_arn   = module.sns.sns_topic_arn
+  aws_account_id  = var.aws_account_id
+}
+
 module "sns" {
   source             = "./modules/sns"
   sns_topic_name     = "IventTopic"
@@ -61,6 +68,7 @@ module "lambda" {
   subscriptions_table_name   = module.dynamodb.subscriptions_table_name
   events_table_stream_arn    = module.dynamodb.events_table_stream_arn
   sns_topic_arn              = module.sns.sns_topic_arn
+  sender_email               = var.sender_email
   private_subnet_ids         = module.vpc.private_subnet_ids
   lambda_sg_id               = module.vpc.lambda_sg_id
 }
