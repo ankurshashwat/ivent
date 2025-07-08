@@ -3,7 +3,7 @@ name: Terraform CI/CD
 permissions:
   id-token: write
   contents: read
-  
+
 on:
   push:
     branches:
@@ -12,6 +12,10 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
+
     env:
       AWS_REGION: us-east-1
       TF_VAR_lambda_role_name: IventLambdaRole
@@ -42,12 +46,9 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./terraform
 
       - name: Terraform Plan
-        working-directory: ./terraform
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        working-directory: ./terraform
         run: terraform apply -auto-approve tfplan
