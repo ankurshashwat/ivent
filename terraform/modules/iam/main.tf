@@ -64,9 +64,24 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "sns:Subscribe",
           "sns:GetTopicAttributes",
           "sns:SetTopicAttributes",
-          "sns:ListTagsForResource"
+          "sns:ListTagsForResource",
+          "sns:CreateTopic",
+          "sns:DeleteTopic",
+          "sns:GetSubscriptionAttributes",
+          "sns:ConfirmSubscription"
         ]
-        Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
+        Resource = [
+          "arn:aws:sns:us-east-1:533267197673:*",
+          "arn:aws:sns:us-east-1:533267197673:IventTopic"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -216,7 +231,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           aws_iam_role.lambda_role.arn,
           aws_iam_role.github_actions_role.arn,
           "arn:aws:iam::533267197673:policy/*",
-          "arn:aws:iam::533267197673:role/Ivent*"
+          "arn:aws:iam::533267197673:role/Ivent*",
+          "arn:aws:iam::533267197673:oidc-provider/token.actions.githubusercontent.com"
         ]
       },
       {
