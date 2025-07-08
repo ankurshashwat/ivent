@@ -65,15 +65,9 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "sns:GetTopicAttributes",
           "sns:SetTopicAttributes",
           "sns:ListTagsForResource",
-          "sns:CreateTopic",
-          "sns:DeleteTopic",
-          "sns:GetSubscriptionAttributes",
-          "sns:ConfirmSubscription"
+          "sns:ListSubscriptionsByTopic"
         ]
-        Resource = [
-          "arn:aws:sns:us-east-1:533267197673:*",
-          "arn:aws:sns:us-east-1:533267197673:IventTopic"
-        ]
+        Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
       },
       {
         Effect = "Allow"
@@ -188,6 +182,13 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "sns:*"
         ]
         Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ses:*"
+        ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
