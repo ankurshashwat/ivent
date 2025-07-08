@@ -11,17 +11,17 @@ logger.setLevel(logging.INFO)
 # Initialize clients
 dynamodb = boto3.resource('dynamodb')
 sns = boto3.client('sns')
-table_name = os.environ['DYNAMODB_TABLE']
+table_name = os.environ['DYNAMODB_TABLE'] 
 sns_topic_arn = os.environ['SNS_TOPIC_ARN']
 table = dynamodb.Table(table_name)
 
 def lambda_handler(event, context):
     """
-    Handles API Gateway requests to manage subscriptions.
+    Handles API Gateway POST requests to manage subscriptions.
     - POST: Adds a new subscriber to the Subscriptions table and SNS topic.
     """
     http_method = event.get('httpMethod')
-    logger.info(f"Received {http_method} request: {json.dumps(event)}")
+    logger.info(f"Received {http_method} request: {json.dumps(event, indent=2)}")
 
     try:
         if http_method == 'POST':
@@ -30,6 +30,7 @@ def lambda_handler(event, context):
             phone = body.get('phone')
             
             if not email and not phone:
+                logger.error("No email or phone provided in request body")
                 return {
                     'statusCode': 400,
                     'body': json.dumps({'error': 'At least one of email or phone is required'})
@@ -48,27 +49,46 @@ def lambda_handler(event, context):
             
             # Save to DynamoDB
             table.put_item(Item=item)
+            logger.info(f"Saved subscriber {subscriber_id} to DynamoDB: {json.dumps(item, indent=2)}")
             
             # Subscribe to SNS topic
+            subscription_arn = None
             if email:
-                sns.subscribe(
+                response = sns.subscribe(
                     TopicArn=sns_topic_arn,
                     Protocol='email',
-                    Endpoint=email
+                    Endpoint=email,
+                    ReturnSubscriptionArn=True
                 )
-                logger.info(f"Subscribed email {email} to SNS topic")
+                subscription_arn = response['SubscriptionArn']
+                logger.info(f"Subscribed email {email} to SNS topic {sns_topic_arn}, SubscriptionArn: {subscription_arn}")
             
             if phone:
-                sns.subscribe(
+                response = sns.subscribe(
                     TopicArn=sns_topic_arn,
                     Protocol='sms',
-                    Endpoint=phone
+                    Endpoint=phone,
+                    ReturnSubscriptionArn=True
                 )
-                logger.info(f"Subscribed phone {phone} to SNS topic")
+                subscription_arn = response['SubscriptionArn']
+                logger.info(f"Subscribed phone {phone} to SNS topic {sns_topic_arn}, SubscriptionArn: {subscription_arn}")
+            
+            # Update DynamoDB with subscription ARN
+            if subscription_arn:
+                table.update_item(
+                    Key={'subscriber_id': subscriber_id},
+                    UpdateExpression='SET subscription_arn = :arn',
+                    ExpressionAttributeValues={':arn': subscription_arn}
+                )
+                logger.info(f"Updated subscriber {subscriber_id} with SubscriptionArn: {subscription_arn}")
             
             return {
                 'statusCode': 200,
-                'body': json.dumps({'message': 'Subscribed', 'subscriber_id': subscriber_id})
+                'body': json.dumps({
+                    'message': 'Subscribed',
+                    'subscriber_id': subscriber_id,
+                    'subscription_arn': subscription_arn
+                })
             }
         
         else:
