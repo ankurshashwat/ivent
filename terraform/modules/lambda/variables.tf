@@ -38,6 +38,11 @@ variable "sns_topic_arn" {
   type        = string
 }
 
+variable "sender_email" {
+  description = "Sender email address for SES"
+  type        = string
+}
+
 variable "private_subnet_ids" {
   description = "List of private subnet IDs for Lambda VPC configuration"
   type        = list(string)

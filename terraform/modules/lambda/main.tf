@@ -78,6 +78,7 @@ resource "aws_lambda_function" "notification_trigger" {
   environment {
     variables = {
       SNS_TOPIC_ARN = var.sns_topic_arn
+      SENDER_EMAIL  = var.sender_email
     }
   }
   tracing_config {
