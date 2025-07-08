@@ -66,7 +66,7 @@ ivent/
 │         ├── iam/                 # IAM roles for Lambda and GitHub Actions
 │         ├── api_gateway/         # API Gateway with REST endpoints
 │         ├── sns/                 # SNS topic for notifications
-│         ├── sns/                 # SES for subscriber notifications
+│         ├── ses/                 # SES for subscriber notifications
 │         ├── dynamodb/            # DynamoDB tables for events and subscriptions
 │         ├── cognito/             # Cognito user pool for authentication
 │         └── backend/             # S3 buckets for Terraform state
