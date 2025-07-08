@@ -12,10 +12,6 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./terraform
-
     env:
       AWS_REGION: us-east-1
       TF_VAR_lambda_role_name: IventLambdaRole
@@ -26,8 +22,6 @@ jobs:
       TF_VAR_github_repo: ankurshashwat/ivent
       TF_VAR_test_username: ${{ secrets.TEST_USERNAME }}
       TF_VAR_test_password: ${{ secrets.TEST_PASSWORD }}
-      TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-      TF_VAR_sender_email: ${{ secrets.SENDER_EMAIL }}
 
     steps:
       - name: Checkout Repository
@@ -46,9 +40,12 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ./terraform
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
+        working-directory: ./terraform
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply tfplan
+        working-directory: ./terraform
