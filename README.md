@@ -115,6 +115,8 @@ Follow these steps to fork and set up the project locally:
     ```bash
     TEST_USERNAME: Cognito test username
     TEST_PASSWORD: Cognito test password
+    AWS_ACCOUNT_ID: AWS Account ID
+    EMAIL: Senders Email Address
     ```
 
 4. **Initialize Terraform**
