@@ -12,7 +12,7 @@ variable "aws_account_id" {
 variable "bucket_name" {
   description = "S3 bucket name for Terraform state"
   type        = string
-  default     = "ivent-tf-state-bucket"
+  default     = "ivent-tf-st"
 }
 
 variable "dynamodb_lock_table" {

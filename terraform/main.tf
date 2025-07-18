@@ -6,7 +6,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "ivent-tf-state-bucket"
+    bucket         = "ivent-tf-st"
     key            = "state/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "ivent-tf-lock"
@@ -28,6 +28,8 @@ module "vpc" {
 module "cognito" {
   source             = "./modules/cognito"
   user_pool_name     = "ivent-user-pool"
+  test_username      = var.test_username
+  test_password      = var.test_password
 }
 
 module "ses" {
@@ -50,6 +52,7 @@ module "dynamodb" {
 
 module "iam" {
   source                   = "./modules/iam"
+  aws_account_id           = var.aws_account_id
   lambda_role_name         = "IventLambdaRole"
   github_actions_role_name = "IventGithubActionsRole"
   events_table_arn         = module.dynamodb.events_table_arn
