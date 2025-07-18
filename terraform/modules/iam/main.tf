@@ -67,7 +67,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "sns:ListTagsForResource",
           "sns:ListSubscriptionsByTopic"
         ]
-        Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
+        Resource = "arn:aws:sns:us-east-1:${var.aws_account_id}:IventTopic"
       },
       {
         Effect = "Allow"
@@ -141,10 +141,10 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "s3:*"
         ]
         Resource = [
-          "arn:aws:s3:::ivent-tf-state-bucket",
-          "arn:aws:s3:::ivent-tf-state-bucket/*",
-          "arn:aws:s3:::ivent-tf-state-dev",
-          "arn:aws:s3:::ivent-tf-state-dev/*"
+          "arn:aws:s3:::ivent-tf-st",
+          "arn:aws:s3:::ivent-tf-st/*",
+          "arn:aws:s3:::ivent-tf-st-dev",
+          "arn:aws:s3:::ivent-tf-st-dev/*"
         ]
       },
       {
@@ -156,7 +156,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           var.events_table_arn,
           var.subscriptions_table_arn,
           var.events_table_stream_arn,
-          "arn:aws:dynamodb:us-east-1:533267197673:table/ivent-tf-lock"
+          "arn:aws:dynamodb:us-east-1:${var.aws_account_id}:table/ivent-tf-lock"
         ]
       },
       {
@@ -165,8 +165,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "logs:*"
         ]
         Resource = [
-          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*",
-          "arn:aws:logs:us-east-1:533267197673:log-group:/aws/*:log-stream:*"
+          "arn:aws:logs:us-east-1:${var.aws_account_id}:log-group:/aws/*",
+          "arn:aws:logs:us-east-1:${var.aws_account_id}:log-group:/aws/*:log-stream:*"
         ]
       },
       {
@@ -174,14 +174,14 @@ resource "aws_iam_role_policy" "github_actions_policy" {
         Action = [
           "cognito-idp:*"
         ]
-        Resource = "arn:aws:cognito-idp:us-east-1:533267197673:userpool/*"
+        Resource = "arn:aws:cognito-idp:us-east-1:${var.aws_account_id}:userpool/*"
       },
       {
         Effect = "Allow"
         Action = [
           "sns:*"
         ]
-        Resource = "arn:aws:sns:us-east-1:533267197673:IventTopic"
+        Resource = "arn:aws:sns:us-east-1:${var.aws_account_id}:IventTopic"
       },
       {
         Effect = "Allow"
@@ -203,8 +203,8 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "lambda:*"
         ]
         Resource = [
-          "arn:aws:lambda:us-east-1:533267197673:*",
-          "arn:aws:lambda:us-east-1:533267197673:event-source-mapping:*"
+          "arn:aws:lambda:us-east-1:${var.aws_account_id}:*",
+          "arn:aws:lambda:us-east-1:${var.aws_account_id}:event-source-mapping:*"
         ]
       },
       {
@@ -221,7 +221,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
         Action = [
           "ssm:*"
         ]
-        Resource = "arn:aws:ssm:us-east-1:533267197673:parameter/ivent/*"
+        Resource = "arn:aws:ssm:us-east-1:${var.aws_account_id}:parameter/ivent/*"
       },
       {
         Effect = "Allow"
@@ -231,9 +231,9 @@ resource "aws_iam_role_policy" "github_actions_policy" {
         Resource = [
           aws_iam_role.lambda_role.arn,
           aws_iam_role.github_actions_role.arn,
-          "arn:aws:iam::533267197673:policy/*",
-          "arn:aws:iam::533267197673:role/Ivent*",
-          "arn:aws:iam::533267197673:oidc-provider/token.actions.githubusercontent.com"
+          "arn:aws:iam::${var.aws_account_id}:policy/*",
+          "arn:aws:iam::${var.aws_account_id}:role/Ivent*",
+          "arn:aws:iam::${var.aws_account_id}:oidc-provider/token.actions.githubusercontent.com"
         ]
       },
       {
@@ -248,7 +248,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
         Action = [
           "events:*"
         ]
-        Resource = "arn:aws:events:us-east-1:533267197673:event-bus/*"
+        Resource = "arn:aws:events:us-east-1:${var.aws_account_id}:event-bus/*"
       },
       {
         Effect = "Allow"
