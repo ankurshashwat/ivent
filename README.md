@@ -124,7 +124,7 @@ Follow these steps to fork and set up the project locally:
      ```bash
      terraform init
      ```
-     - This configures the S3 backend (`ivent-tf-state-dev`) and DynamoDB lock table (`ivent-tf-lock`).
+     - This configures the S3 backend (`ivent-tf-st-dev`) and DynamoDB lock table (`ivent-tf-lock`).
 
 5. **Set Up Terraform Variables**
    - Create a `terraform.tfvars` file in the root directory:
